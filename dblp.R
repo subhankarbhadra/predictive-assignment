@@ -1,15 +1,27 @@
 source("predinf_sbm.R")
 
-#Clustering algorithm (SVD + K-means) (regularized)
-fast.clustering_reg <- function(A, k, niter, nstart, reg = "none") {
-  if(reg == "none") {
+# Performs spectral clustering with or without laplacian transformation
+#
+# Arguments:
+#  M: n x n symmetric matrix
+#  k: Integer, number of communities
+#  niter: Integer, maximum number of iterations for kmeans
+#  nstart: Integer, number of initializations for kmeans
+#  version: "none" for without laplacian, "laplacian" for with laplacian, "laplacian+deg" for with laplacian and degree-regularization
+#
+# Returns: A list
+#  cluster: Integer vector, estimated community assignments
+#  times: runtimes for performing svd and kmeans
+#
+fast.clustering_reg <- function(A, k, niter, nstart, version = "none") {
+  if(version == "none") {
     t1 <- system.time(e <- irlba(A, nu = k, nv = k))[3]
-  } else if(reg == "laplacian") {
-    M <- -laplacian_matrix(graph_from_adjacency_matrix(A, mode = "undirected"), normalized = T)
+  } else if(version == "laplacian") {
+    M <- -laplacian_matrix(graph_from_adjacency_matrix(A, mode = "undirected"), normalization = "symmetric")
     diag(M) <- 0
     
     t1 <- system.time(e <- irlba(M, nu = k, nv = k))[3]
-  } else if(reg == "laplacian+deg") {
+  } else if(version == "laplacian+deg") {
     n <- ncol(A)
     degree <- colSums(A)
     
@@ -24,20 +36,49 @@ fast.clustering_reg <- function(A, k, niter, nstart, reg = "none") {
   list(cluster = c, times = c(t1, t2))
 }
 
-#Spectral clustering on full matrix (regularized)
-specclustering_reg <- function(A, k, adjusted = F, niter, nstart, reg) {
+# Performs spectral clustering given an adjacency matrix with or without laplacian transformation
+# Same as `fast.clustering_reg`, with an indicator for whether it is applied on the adjacency matrix itself, or its bias-adjusted version 
+#
+# Arguments:
+#  A: n x n symmetric binary adjacency matrix
+#  k: Integer, number of communities
+#  adjusted: Indicator for whether spectral clustering is to be applied on A, or its bias-adjusted version, A^2 - D
+#  niter: Integer, maximum number of iterations for kmeans
+#  nstart: Integer, number of initializations for kmeans
+#  version: "none" for without laplacian, "laplacian" for with laplacian, "laplacian+deg" for with laplacian and degree-regularization
+#
+# Returns: A list
+#  cluster: Integer vector, estimated community assignments
+#  times: runtimes for performing svd and kmeans
+#
+specclustering_reg <- function(A, k, adjusted = F, niter, nstart, version) {
   n <- ncol(A)
   if(adjusted == F) M <- A
   else {
     M <- as.matrix(crossprod(A))
     M <- `diag<-`(M, 0)
   }
-  cw <- fast.clustering_reg(M, k, niter, nstart, reg)
+  cw <- fast.clustering_reg(M, k, niter, nstart, version)
   cw
 }
 
-#Clustering based on predictive assignment
-effclustering_reg <- function(A, k, p, method = "cc", adjusted = F, niter, nstart, reg = "none") {
+# Clustering based on predictive assignment (closest community approach)
+#
+# Arguments:
+#  A: n x n symmetric binary adjacency matrix
+#  k: Integer, number of communities
+#  p: Numeric, (log m)/(log n) where m is the size of the subgraph
+#  method: Predictive assignment approach ("cc" for closest community)
+#  niter: Integer, maximum number of iterations for kmeans
+#  nstart: Integer, number of initializations for kmeans
+#  version: "none" for without laplacian, "laplacian" for with laplacian, "laplacian+deg" for with laplacian and degree-regularization
+#
+# Returns: A list
+#  cluster: Integer vector, estimated community assignments
+#  subsample: Integer vector, nodes selected in the subgraph
+#  times: runtimes for sampling, spectral clustering on subgraph and predictive assignment of remaining nodes
+#
+effclustering_reg <- function(A, k, p, method = "cc", adjusted = F, niter, nstart, version = "none") {
   #sampling
   t1 <- system.time({
     n <- ncol(A);
@@ -52,7 +93,7 @@ effclustering_reg <- function(A, k, p, method = "cc", adjusted = F, niter, nstar
   })[3]
   
   #spectral clustering on subgraph
-  t2 <- system.time(cw <- fast.clustering_reg(M, k, niter, nstart, reg))[3]
+  t2 <- system.time(cw <- fast.clustering_reg(M, k, niter, nstart, version))[3]
   
   #predictive assignment of remaining nodes
   t3 <- system.time({
@@ -93,10 +134,13 @@ k <- length(unique(classes))
 
 set.seed(12345)
 
-eval_eff <- function(p, reg){
-  time <- system.time(out <- effclustering_reg(A, k, p, "cc", adjusted = F, niter, nstart, reg))[3]
+# Applies predictive assignment on DBLP network for different values of p = (log m)/(log n)
+# Returns community detection errors for subgraph nodes, remaining nodes, and all nodes, and average runtime
+#
+eval_eff <- function(p, version){
+  time <- system.time(out <- effclustering_reg(A, k, p, "cc", adjusted = F, niter, nstart, version))[3]
   err <- calc_error_eff(out, classes)
-  c(err, out$times, unname(time))
+  c(err, unname(time))
 }
 
 dd <- rbind(cbind(t(replicate(N, eval_eff(0.70, "none"))), rep(0.70, N), rep("none", N)),
@@ -106,22 +150,25 @@ dd <- rbind(cbind(t(replicate(N, eval_eff(0.70, "none"))), rep(0.70, N), rep("no
             cbind(t(replicate(N, eval_eff(0.75, "laplacian"))), rep(0.75, N), rep("laplacian", N)),
             cbind(t(replicate(N, eval_eff(0.80, "laplacian"))), rep(0.80, N), rep("laplacian", N)))
 
-dd <- as.data.frame(dd[,c(1:3,7:9)])
-dd$V1 <- as.numeric(dd$V1)
-dd$V2 <- as.numeric(dd$V2)
-dd$V3 <- as.numeric(dd$V3)
-dd$V4 <- as.numeric(dd$V4)
-tb <- dd %>% group_by(V6, V5) %>% 
-  summarise(avg.rate1 = mean(V1)*100,
-            sd.rate1 = sd(V1)*100,avg.rate2 = mean(V2)*100,
-            sd.rate2 = sd(V2)*100,avg.rate = mean(V3)*100,
-            sd.rate = sd(V3)*100, avg.tot = mean(V4)) %>% as_tibble()
-tb
-tb$avg.rate
+dd <- as.data.frame(dd)
+colnames(dd) <- c("rate1", "rate2", "rate", "time", "p", "version")
 
-eval_spec <- function(reg){
-  time <- system.time(out <- specclustering_reg(A, k, F, niter, nstart, reg))[3]
+# Summarizing results 
+# Average community detection error and average runtime
+#
+for (i in 1:4) dd[[i]] <- as.numeric(dd[[i]])
+tb <- dd %>% group_by(version, p) %>% 
+  summarise(avg.rate = mean(rate)*100, sd.rate = sd(rate)*100, 
+            avg.time = mean(time)) %>% as_tibble()
+tb
+
+# Applies spectral clustering on DBLP network
+eval_spec <- function(version){
+  time <- system.time(out <- specclustering_reg(A, k, F, niter, nstart, version))[3]
   err <- calc_error_spec(out, classes)
-  c(err, out$times, unname(time))
+  c(err, unname(time))
 }
-eval_spec("none")[c(1,4)]; eval_spec("laplacian")[c(1,4)]
+
+# Community detection error and average runtime
+eval_spec("none")
+eval_spec("laplacian")

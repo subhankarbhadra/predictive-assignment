@@ -7,6 +7,14 @@ library(irlba)
 library(Rcpp)
 library(inline)
 
+# Rearranges the rows and columns of a matrix so that its largest element is moved to the (1,1) position
+#
+# Arguments:
+#   M : Numeric matrix
+#
+# Returns:
+#   Numeric matrix with the largest element moved to the (1,1) position
+#
 maxswap <- function(M) {
   n <- nrow(M)
   k <- which.max(M)
@@ -18,14 +26,33 @@ maxswap <- function(M) {
   M
 }
 
-#Helper function to rearrange the classification matrix
+# Greedy algorithm to correct label permutation
+# Iteratively permute the rows and columns of a confusion matrix to align predicted labels with true labels
+#
+# Arguments:
+#   M : Confusion matrix (numeric)
+#
+# Returns:
+#   Permuted confusion matrix with improved alignment of labels
+#
 miscorrect <- function(M) {
   n <- nrow(M)
   for (i in 1:(n-1)) M[i:n, i:n] <- maxswap(M[i:n, i:n])
   M
 }
 
-#Clustering algorithm (SVD + K-means)
+# Performs regularized spectral clustering
+#
+# Arguments:
+#  A: n x n symmetric binary adjacency matrix
+#  k: Integer, number of communities
+#  niter: Integer, maximum number of iterations for kmeans
+#  nstart: Integer, number of initializations for kmeans
+#
+# Returns: A list
+#  cluster: Integer vector, estimated community assignments
+#  times: runtimes for performing svd, row-normalization and kmeans
+#
 fast.clustering_DCBM <- function(A, k, niter, nstart) {
   t1 <- system.time(e <- irlba(A, nu = k, nv = k))[3]
   S <- e$u
@@ -35,12 +62,23 @@ fast.clustering_DCBM <- function(A, k, niter, nstart) {
   list(cluster = c, times = c(t1, t2, t3))
 }
 
-#Spectral clustering on full matrix
+# Performs regularized spectral clustering after excluding zero-degrees nodes
+#
+# Arguments:
+#  A: n x n symmetric binary adjacency matrix
+#  k: Integer, number of communities
+#  niter: Integer, maximum number of iterations for kmeans
+#  nstart: Integer, number of initializations for kmeans
+#
+# Returns: A list
+#  cluster: Integer vector, estimated community assignments
+#  times: runtimes for performing svd and kmeans
+#
 specclustering_DCBM <- function(A, k, niter, nstart) {
   n <- ncol(A)
   deg <- colSums(A)
   
-  #excluding 0-degree nodes from the graph
+  #excluding zero-degree nodes from the graph
   d0 <- which(deg != 0)
   d1 <- setdiff(1:n, d0)
   cw <- fast.clustering_DCBM(A[d0, d0], k, niter, nstart)
@@ -50,7 +88,18 @@ specclustering_DCBM <- function(A, k, niter, nstart) {
   list(cluster = pred, times = cw$times) 
 }
 
-#generating networks from the DCBM
+# Generates a network from a DCBM
+#
+# Arguments:
+#  n: Integer, number of nodes
+#  k: Integer, number of communities
+#  W: k x k numeric matrix, block probability matrix
+#  t: Numeric vector of degree parameters
+#  m: Integer vector of true communities of nodes
+#
+# Returns: 
+#  n x n symmetric binary adjacency matrix
+#
 DCBM.fast <- function(n, k, W, t, comm)
 {
   on.exit(gc())
@@ -66,9 +115,24 @@ DCBM.fast <- function(n, k, W, t, comm)
   A <- sparseMatrix(i = c(vec$i, vec$j), j = c(vec$j, vec$i), x = 1, dims = c(n,n))
 }
 
-#Clustering based on predictive assignment
+# Clustering based on predictive assignment (node popularity approach)
+#
+# Arguments:
+#  A: n x n symmetric binary adjacency matrix
+#  k: Integer, number of communities
+#  p: Numeric, (log m)/(log n) where m is the size of the subgraph
+#  rw: Sampling method (FALSE for Simple Random Sampling, TRUE for Random Walk Sampling)
+#  method: Predictive assignment approach ("np" for node popularity)
+#  niter: Integer, maximum number of iterations for kmeans
+#  nstart: Integer, number of initializations for kmeans
+#
+# Returns: A list
+#  cluster: Integer vector, estimated community assignments
+#  subsample: Integer vector, nodes selected in the subgraph
+#  times: runtimes for sampling, spectral clustering on subgraph and predictive assignment of remaining nodes
+#
 effclustering_DCBM <- function(A, k, p, rw = F, method = "np", niter = niter, nstart = nstart) {
-  #sampling
+  # sampling
   t1 <- system.time({
     n <- ncol(A);
     m <- floor(n^p);
@@ -78,19 +142,19 @@ effclustering_DCBM <- function(A, k, p, rw = F, method = "np", niter = niter, ns
       subnet <- sample(1:n, m)
     };
     
-    #excluding 0-degree nodes from the subgraph
+    # excluding 0-degree nodes from the subgraph
     zd <- which(colSums(A[subnet, subnet]) == 0);
     if(length(zd) > 0) subnet <- subnet[-zd];
     rest <- setdiff(1:n, subnet);
     m <- length(subnet)
   })[3]
   
-  #spectral clustering on subgraph
+  # spectral clustering on subgraph
   t2 <- system.time(cw <- fast.clustering_DCBM(A[subnet, subnet], k, niter, nstart))[3]
   
-  #predictive assignment of remaining nodes
+  # predictive assignment of remaining nodes
   t3 <- system.time(if(method == "np") {
-    #excluding nodes with zero connection to the subgraph 
+    # excluding nodes with zero connection to the subgraph 
     d0 <- which(colSums(A[subnet, rest]) == 0)
     rest0 <- rest[d0]
     rest1 <- setdiff(rest, rest0)
@@ -98,7 +162,7 @@ effclustering_DCBM <- function(A, k, p, rw = F, method = "np", niter = niter, ns
     
     comm_sub <- split(subnet, cw$cluster)
     
-    #calculating a scaled version of omega-hat
+    # calculating a scaled version of omega-hat
     What <- matrix(0, ncol = k, nrow = k)
     
     mr <- unname(table(cw$cluster))
@@ -123,7 +187,14 @@ effclustering_DCBM <- function(A, k, p, rw = F, method = "np", niter = niter, ns
   list(cluster = pred, subsample = subnet, times = c(t1, t2, t3))
 }
 
-#Calculate error from output of `specclustering`
+# Calculates misclassification error from spectral clustering results
+# Arguments:
+#  out: An output from specclustering_DCBM()
+#  classes: Integer vector, true community labels
+#
+# Returns:
+#  Numeric, misclassification error
+#
 calc_error_spec <- function(out, classes) {
   pred <- out$cluster
   n <- length(pred)
@@ -138,7 +209,14 @@ calc_error_spec <- function(out, classes) {
   1 - sum(diag(cf))/n
 }
 
-#Calculate error from output of `effclustering`
+# Calculates misclassification error from predictive assignment-based clustering results
+# Arguments:
+#  out: An output from effclustering_DCBM()
+#  classes: Integer vector, true community labels
+#
+# Returns:
+#  Numeric vector, misclassification errors for subgraph nodes, remaining nodes, and all nodes 
+#
 calc_error_eff <- function(out, classes) {
   pred <- out$cluster
   subnet <- out$subsample

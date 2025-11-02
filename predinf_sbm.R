@@ -7,6 +7,14 @@ library(irlba)
 library(Rcpp)
 library(inline)
 
+# Rearranges the rows and columns of a matrix so that its largest element is moved to the (1,1) position
+#
+# Arguments:
+#   M : Numeric matrix
+#
+# Returns:
+#   Numeric matrix with the largest element moved to the (1,1) position
+#
 maxswap <- function(M) {
   n <- nrow(M)
   k <- which.max(M)
@@ -18,14 +26,33 @@ maxswap <- function(M) {
   M
 }
 
-#Helper function to rearrange the classification matrix
+# Greedy algorithm to correct label permutation
+# Iteratively permute the rows and columns of a confusion matrix to align predicted labels with true labels
+#
+# Arguments:
+#   M : Confusion matrix (numeric)
+#
+# Returns:
+#   Permuted confusion matrix with improved alignment of labels
+#
 miscorrect <- function(M) {
   n <- nrow(M)
   for (i in 1:(n-1)) M[i:n, i:n] <- maxswap(M[i:n, i:n])
   M
 }
 
-#Clustering algorithm (SVD + K-means)
+# Performs spectral clustering
+#
+# Arguments:
+#  M: n x n symmetric matrix
+#  k: Integer, number of communities
+#  niter: Integer, maximum number of iterations for kmeans
+#  nstart: Integer, number of initializations for kmeans
+#
+# Returns: A list
+#  cluster: Integer vector, estimated community assignments
+#  times: runtimes for performing svd and kmeans
+#
 fast.clustering <- function(M, k, niter, nstart) {
   t1 <- system.time(e <- irlba(M, nu = k, nv = k))[3]
   S <- e$u
@@ -33,7 +60,20 @@ fast.clustering <- function(M, k, niter, nstart) {
   list(cluster = c, times = c(t1, t2))
 }
 
-#Spectral clustering on full matrix
+# Performs spectral clustering given an adjacency matrix
+# Same as `fast.clustering`, with an indicator for whether it is applied on the adjacency matrix itself, or its bias-adjusted version 
+#
+# Arguments:
+#  A: n x n symmetric binary adjacency matrix
+#  k: Integer, number of communities
+#  adjusted: Indicator for whether spectral clustering is to be applied on A, or its bias-adjusted version, A^2 - D
+#  niter: Integer, maximum number of iterations for kmeans
+#  nstart: Integer, number of initializations for kmeans
+#
+# Returns: A list
+#  cluster: Integer vector, estimated community assignments
+#  times: runtimes for performing svd and kmeans
+#
 specclustering <- function(A, k, adjusted = F, niter, nstart) {
   n <- ncol(A)
   if(adjusted == F) M <- A
@@ -46,7 +86,15 @@ specclustering <- function(A, k, adjusted = F, niter, nstart) {
 }
 
 
-#Helper function for predictive assignment using inline
+# Performs Step 3 of predictive assignment using closest community approach
+# This is a computationally efficient implementation using `inline`
+# Arguments:
+#  x: (n-m) x k numeric matrix, the estimated theta matrix multiplied by (-2)
+#  l: list of length (n-m), neighbors of the remaining nodes
+#  v: numeric vector of length k,  squared l_2 norms of columns of the estimated theta matrix 
+# Returns:
+#  Integer vector, estimated community assignments
+#
 sig <- c(x = "double", l = "list", v = "double")
 
 bod <- '
@@ -97,9 +145,23 @@ bod <- '
 min_dist_inline <- cfunction(sig, bod, language = "C")
 
 
-#Clustering based on predictive assignment
+# Clustering based on predictive assignment (closest community approach)
+#
+# Arguments:
+#  A: n x n symmetric binary adjacency matrix
+#  k: Integer, number of communities
+#  p: Numeric, (log m)/(log n) where m is the size of the subgraph
+#  method: Predictive assignment approach ("cc" for closest community)
+#  niter: Integer, maximum number of iterations for kmeans
+#  nstart: Integer, number of initializations for kmeans
+#
+# Returns: A list
+#  cluster: Integer vector, estimated community assignments
+#  subsample: Integer vector, nodes selected in the subgraph
+#  times: runtimes for sampling, spectral clustering on subgraph and predictive assignment of remaining nodes
+#
 effclustering <- function(A, k, p, method = "cc", adjusted = F, niter, nstart) {
-  #sampling
+  # sampling
   t1 <- system.time({
     n <- ncol(A);
     m <- floor(n^p);
@@ -112,17 +174,17 @@ effclustering <- function(A, k, p, method = "cc", adjusted = F, niter, nstart) {
     }
   })[3]
   
-  #community detection on subgraph
+  # community detection on subgraph
   t2 <- system.time(cw <- fast.clustering(M, k, niter, nstart))[3]
   
-  #predictive assignment of remaining nodes
+  # predictive assignment of remaining nodes
   t3 <- system.time({
     mr <- unname(table(cw$cluster));
     if(method == "cc") {
-      #calculate theta
+      # estimate theta
       theta <- sapply(1:k, function(r) rowSums(A[rest, subnet[cw$cluster == r], drop = F])/mr[r])
       
-      #find neighbors of nodes
+      # find neighbors of nodes
       Arest <- A[rest, rest]
       a <- Arest@i + 1L;
       b <- Arest@p + 1L;
@@ -133,7 +195,7 @@ effclustering <- function(A, k, p, method = "cc", adjusted = F, niter, nstart) {
       l <- length(nbr)
       if(l != (n-m)) stop("neighbor extraction error")
       
-      #find community with minimum distance
+      # find community with minimum distance
       tk <- colSums(theta^2)
       restc <- min_dist_inline(-2*theta, nbr, tk)
     } else stop("wrong method")
@@ -146,7 +208,14 @@ effclustering <- function(A, k, p, method = "cc", adjusted = F, niter, nstart) {
   list(cluster = pred, subsample = subnet, times = c(t1, t2, t3))
 }
 
-#Calculate error from output of `specclustering`
+# Calculates misclassification error from spectral clustering results
+# Arguments:
+#  out: An output from specclustering()
+#  classes: Integer vector, true community labels
+#
+# Returns:
+#  Numeric, misclassification error
+#
 calc_error_spec <- function(out, classes) {
   pred <- out$cluster
   n <- length(pred)
@@ -161,7 +230,14 @@ calc_error_spec <- function(out, classes) {
   1 - sum(diag(cf))/n
 }
 
-#Calculate error from output of `effclustering`
+# Calculates misclassification error from predictive assignment-based clustering results
+# Arguments:
+#  out: An output from effclustering()
+#  classes: Integer vector, true community labels
+#
+# Returns:
+#  Numeric vector, misclassification errors for subgraph nodes, remaining nodes, and all nodes 
+#
 calc_error_eff <- function(out, classes) {
   pred <- out$cluster
   subnet <- out$subsample
