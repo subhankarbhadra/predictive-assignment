@@ -1,0 +1,219 @@
+% stdout
+fprintf('\nGraph parameters\n');
+fprintf('----------------------\n');
+fprintf('n = %d\n', n);
+fprintf('K = %d\n', K);
+fprintf('Average degree = %.f\n', avg_deg);
+fprintf('----------------------\n');
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%%%% Generate graph %%%%
+fprintf('\nGenerating graph...\n')
+time1 = tic;
+[A, comm] = cbm_parallel(10, n, rho, B, pi);
+n = size(A, 1); K = max(comm);
+timetaken.graph_generation = toc(time1);
+fprintf('Time taken in creating the graph = %.2f seconds\n', timetaken.graph_generation);
+
+%A = diag(1:20000) + ones(20000, 20000);
+%%
+[i,j,val] = find(A);
+data_dump = [i,j,val];
+save -ascii matadj.txt data_dump
+save -ascii comm.txt comm
+
+%% 
+%%%% Global method %%%%
+fprintf('Running global algorithm...\n')
+%[A1, ~, ~, I1] = process_real_graph(A, A, A, 1); % largest connected component of A
+%comm1 = comm(I1);
+% length(I1)
+
+time2 = tic;
+[~, comm_est] = spectral(A, K, 'unregLaplacian', 'true');
+timetaken_global = toc(time2)
+
+error_global = cluster_acc(comm, comm_est)
+
+%%
+time2 = tic;
+[~, comm_est] = spectral(A, K, 'regLaplacian', 'true', 'Rohe');
+timetaken_rohe = toc(time2)
+% fprintf('Time taken by the global algorithm = %f\n', timetaken.global);
+
+error_rohe = cluster_acc(comm, comm_est)
+
+%%
+
+time2 = tic;
+[~, comm_est] = spectral(A, K, 'regLaplacian', 'true', 'Amini');
+timetaken_amini = toc(time2)
+
+error_amini = cluster_acc(comm, comm_est)
+
+%%
+
+t1 = tic;[pred,~,~,~,tcon] = divconq_parallel(A, [], 100, 'random', 1500, 'both', 'spectral', K, 'sp', ...
+    struct('rho', 0.002, 'bal', true, 'row_normalization', 'true', 'tau_method', 'custom', 'true_id', comm, ...
+    'reg_type2', 'none'));toc(t1);
+
+err_p = cluster_acc(comm, pred.PACE)
+err_g = cluster_acc(comm, pred.GALE)
+
+time_p = tcon.GALE_subgraphs_total + tcon.PACE_thresholding_C + tcon.PACE_recovering_Z
+time_g = tcon.GALE_subgraphs_total + tcon.GALE_patching_step
+
+%%
+
+t1 = tic;[pred,~,~,~,tcon] = divconq_parallel(A, [], 100, 'random', 1500, 'PACE', 'spectral', K, 'rsp', ...
+    struct('rho', 0.002, 'bal', true, 'row_normalization', 'true', 'tau_method', 'custom', 'true_id', comm, ...
+    'reg_type1', 'Rohe','reg_type2', 'Rohe'));toc(t1);
+
+err_p = cluster_acc(comm, pred.PACE)
+err_g = cluster_acc(comm, pred.GALE)
+
+time_p = tcon.GALE_subgraphs_total + tcon.PACE_thresholding_C + tcon.PACE_recovering_Z
+time_g = tcon.GALE_subgraphs_total + tcon.GALE_patching_step
+
+%%
+
+t1 = tic;[pred,~,~,~,tcon] = divconq_parallel(A, [], 100, 'random', 1500, 'PACE', 'spectral', K, 'rsp', ...
+    struct('rho', 0.002, 'bal', true, 'row_normalization', 'true', 'tau_method', 'custom', 'true_id', comm, ...
+    'reg_type1', 'Amini', 'reg_type2', 'Amini'));toc(t1);
+
+err_p = cluster_acc(comm, pred.PACE)
+err_g = cluster_acc(comm, pred.GALE)
+
+time_p = tcon.GALE_subgraphs_total + tcon.PACE_thresholding_C + tcon.PACE_recovering_Z
+time_g = tcon.GALE_subgraphs_total + tcon.GALE_patching_step
+
+%%
+
+t1 = tic;[pred2, ~] = effclustering(A, K, 0.2, 'SRS', 'sp', 'true', 'cc');toc(t1);
+err = cluster_acc(comm, pred2)
+
+%%
+
+t1 = tic;[pred2, ~] = effclustering(A, K, 0.2, 'SRS', 'rsp', 'true', 'cc', 'Rohe');toc(t1);
+err = cluster_acc(comm, pred2)
+
+%%
+
+t1 = tic;[pred2, ~] = effclustering(A, K, 0.5, 'SRS', 'rsp', 'true', 'cc', 'Amini');toc(t1);
+err = cluster_acc(comm, pred2)
+
+%%
+rates2 = zeros(10, 12);
+times2 = zeros(10, 12);
+
+for i = 1:50
+    [A, comm] = cbm_parallel(nworkers, n, rho, B, pi);
+    n = size(A, 1); K = max(comm);
+
+    time = tic;
+    [~, comm_est] = spectral(A, K, 'unregLaplacian', 'true');
+    t1 = toc(time);
+    err1 = cluster_acc(comm, comm_est);
+
+    time = tic;
+    [~, comm_est] = spectral(A, K, 'regLaplacian', 'true', 'Rohe');
+    t2 = toc(time);
+    err2 = cluster_acc(comm, comm_est);
+
+    time = tic;
+    [~, comm_est] = spectral(A, K, 'regLaplacian', 'true', 'Amini');
+    t3 = toc(time);
+    err3 = cluster_acc(comm, comm_est);
+
+    [pred,~,~,~,tcon] = divconq_parallel(A, [], 100, 'random', 1500, 'both', 'spectral', K, 'sp', ...
+        struct('rho', 0.002, 'bal', true, 'row_normalization', 'true', 'tau_method', 'custom', 'true_id', comm));
+    
+    err4_p = cluster_acc(comm, pred.PACE);
+    err4_g = cluster_acc(comm, pred.GALE);
+
+    t4_p = tcon.GALE_subgraphs_total + tcon.PACE_thresholding_C + tcon.PACE_recovering_Z;
+    t4_g = tcon.GALE_subgraphs_total + tcon.GALE_patching_step;
+
+    [pred,~,~,~,tcon] = divconq_parallel(A, [], 100, 'random', 1500, 'both', 'spectral', K, 'rsp', ...
+        struct('rho', 0.002, 'bal', true, 'row_normalization', 'true', 'tau_method', 'custom', 'true_id', comm, ...
+        'reg_type1', 'Rohe'));
+    
+    err5_p = cluster_acc(comm, pred.PACE);
+    err5_g = cluster_acc(comm, pred.GALE);
+
+    t5_p = tcon.GALE_subgraphs_total + tcon.PACE_thresholding_C + tcon.PACE_recovering_Z;
+    t5_g = tcon.GALE_subgraphs_total + tcon.GALE_patching_step;
+
+    [pred,~,~,~,tcon] = divconq_parallel(A, [], 100, 'random', 1500, 'both', 'spectral', K, 'rsp', ...
+        struct('rho', 0.002, 'bal', true, 'row_normalization', 'true', 'tau_method', 'custom', 'true_id', comm, ...
+        'reg_type1', 'Amini'));
+    
+    err6_p = cluster_acc(comm, pred.PACE);
+    err6_g = cluster_acc(comm, pred.GALE);
+
+    t6_p = tcon.GALE_subgraphs_total + tcon.PACE_thresholding_C + tcon.PACE_recovering_Z;
+    t6_g = tcon.GALE_subgraphs_total + tcon.GALE_patching_step;
+
+    time = tic;[pred2, ~] = effclustering(A, K, 0.5, 'SRS', 'sp', 'true', 'cc');t7 = toc(time);
+    err7 = cluster_acc(comm, pred2);
+    
+    time = tic;[pred2, ~] = mod_effclustering(A, K, 0.5, 'SRS', 'sp', 'true', 'cc');t7 = toc(time);
+    err7 = cluster_acc(comm, pred2);
+    
+    time = tic;[pred2, ~] = effclustering(A, K, 0.5, 'SRS', 'rsp', 'true', 'cc', 'Rohe');t8 = toc(time);
+    err8 = cluster_acc(comm, pred2);
+
+    time = tic;[pred2, ~] = effclustering(A, K, 0.5, 'SRS', 'rsp', 'true', 'cc', 'Amini');t9 = toc(time);
+    err9 = cluster_acc(comm, pred2);
+    rates(i, :) = [err1 err2 err3 err4_p err5_p err6_p err4_g err5_g err6_g err7 err8 err9];
+    times(i, :) = [t1 t2 t3 t4_p t5_p t6_p t4_g t5_g t6_g t7 t8 t9];
+end
+
+%%
+altrates = zeros(50, 4);
+alttimes = zeros(50, 4);
+
+for i = 1:50
+    [A, comm] = cbm_parallel(nworkers, n, rho, B, pi);
+    n = size(A, 1); K = max(comm);
+
+    [pred,~,~,~,tcon] = divconq_parallel(A, [], 100, 'random', 1500, 'both', 'spectral', K, 'rsp', ...
+        struct('rho', 0.002, 'bal', true, 'row_normalization', 'true', 'tau_method', 'custom', 'true_id', comm, ...
+        'reg_type1', 'Rohe','reg_type2', 'none'));
+    
+    err13_p = cluster_acc(comm, pred.PACE);
+    err13_g = cluster_acc(comm, pred.GALE);
+
+    t13_p = tcon.GALE_subgraphs_total + tcon.PACE_thresholding_C + tcon.PACE_recovering_Z;
+    t13_g = tcon.GALE_subgraphs_total + tcon.GALE_patching_step;
+
+    [pred,~,~,~,tcon] = divconq_parallel(A, [], 100, 'random', 1500, 'both', 'spectral', K, 'rsp', ...
+        struct('rho', 0.002, 'bal', true, 'row_normalization', 'true', 'tau_method', 'custom', 'true_id', comm, ...
+        'reg_type1', 'Amini','reg_type2', 'none'));
+    
+    err14_p = cluster_acc(comm, pred.PACE);
+    err14_g = cluster_acc(comm, pred.GALE);
+
+    t14_p = tcon.GALE_subgraphs_total + tcon.PACE_thresholding_C + tcon.PACE_recovering_Z;
+    t14_g = tcon.GALE_subgraphs_total + tcon.GALE_patching_step;
+
+    altrates(i, :) = [err13_p err14_p err13_g err14_g];
+    alttimes(i, :) = [t13_p t14_p t13_g t14_g];
+end
+
+%%
+testrates = zeros(10, 3);
+
+for i = 1:10
+    [A, comm] = cbm_parallel(nworkers, n, rho, B, pi);
+    n = size(A, 1); K = max(comm);
+    
+    time2 = tic;
+    [~, comm_est,iter] = spectral(A, K, 'regLaplacian', 'true', 'Rohe');
+    timetaken_rohe = toc(time2)
+
+    error_rohe = cluster_acc(comm, comm_est)
+
+    testrates(i, :) = [error_rohe timetaken_rohe iter];
+end

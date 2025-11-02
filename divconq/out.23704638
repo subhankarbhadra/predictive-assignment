@@ -1,0 +1,21 @@
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2023 The MathWorks, Inc.
+                  R2023b (23.2.0.2365128) 64-bit (glnxa64)
+                              August 23, 2023
+
+ 
+To get started, type doc.
+For product information, visit www.mathworks.com.
+ 
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 18 workers.
+[Warning: Empty cluster created at iteration 2.] 
+[> In kmeans/loopBody/batchUpdate (line 551)
+In kmeans/loopBody (line 468)
+In internal.stats.parallel.smartForReduce (line 136)
+In kmeans (line 346)
+In mykmeans1 (line 14)
+In spectral (line 94)
+In newsim3 (line 26)
+In run (line 99)] 

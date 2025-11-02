@@ -1,0 +1,1046 @@
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2023 The MathWorks, Inc.
+                  R2023b (23.2.0.2365128) 64-bit (glnxa64)
+                              August 23, 2023
+
+ 
+To get started, type doc.
+For product information, visit www.mathworks.com.
+ 
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 18 workers.
+
+ Average subgraph size = 1223.03
+
+ Average subgraph size = 1225.18
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.1442
+    classification: 0.0469
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.1935
+    classification: 0.0326
+
+
+ Average subgraph size = 1218.46
+
+ Average subgraph size = 1219.40
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.3787
+    classification: 0.0276
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.7165
+    classification: 0.0499
+
+
+ Average subgraph size = 1222.07
+
+ Average subgraph size = 1222.42
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.0701
+    classification: 0.0352
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.1417
+    classification: 0.0259
+
+
+ Average subgraph size = 1227.19
+
+ Average subgraph size = 1226.82
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.3339
+    classification: 0.0241
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.3294
+    classification: 0.0224
+
+
+ Average subgraph size = 1228.42
+
+ Average subgraph size = 1228.30
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.0837
+    classification: 0.0256
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.1713
+    classification: 0.0595
+
+
+ Average subgraph size = 1222.26
+
+ Average subgraph size = 1219.27
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.0956
+    classification: 0.0283
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 3.0291
+    classification: 0.0229
+
+
+ Average subgraph size = 1234.61
+
+ Average subgraph size = 1232.94
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.0967
+    classification: 0.0266
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.3677
+    classification: 0.0258
+
+
+ Average subgraph size = 1235.34
+
+ Average subgraph size = 1235.15
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.1864
+    classification: 0.0267
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.3765
+    classification: 0.0215
+
+
+ Average subgraph size = 1231.27
+
+ Average subgraph size = 1230.83
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.1706
+    classification: 0.0362
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.3423
+    classification: 0.0221
+
+
+ Average subgraph size = 1230.87
+
+ Average subgraph size = 1231.06
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.1626
+    classification: 0.0284
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.0656
+    classification: 0.0265
+
+
+ Average subgraph size = 1233.55
+
+ Average subgraph size = 1231.29
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.0854
+    classification: 0.0269
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.1924
+    classification: 0.0228
+
+
+ Average subgraph size = 1235.63
+
+ Average subgraph size = 1232.02
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.2781
+    classification: 0.0229
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.4963
+    classification: 0.0249
+
+
+ Average subgraph size = 1230.54
+
+ Average subgraph size = 1231.86
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.2413
+    classification: 0.0235
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.7503
+    classification: 0.0222
+
+
+ Average subgraph size = 1234.69
+
+ Average subgraph size = 1230.89
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.0792
+    classification: 0.0261
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 3.0442
+    classification: 0.0251
+
+
+ Average subgraph size = 1224.44
+
+ Average subgraph size = 1225.48
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.1387
+    classification: 0.0266
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 3.5498
+    classification: 0.0223
+
+
+ Average subgraph size = 1227.15
+
+ Average subgraph size = 1229.38
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.1423
+    classification: 0.0333
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.4055
+    classification: 0.0221
+
+
+ Average subgraph size = 1235.94
+
+ Average subgraph size = 1237.31
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.2101
+    classification: 0.0250
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.6186
+    classification: 0.0224
+
+
+ Average subgraph size = 1226.52
+
+ Average subgraph size = 1227.49
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.1499
+    classification: 0.0528
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 3.1883
+    classification: 0.0294
+
+
+ Average subgraph size = 1232.63
+
+ Average subgraph size = 1235.45
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.1246
+    classification: 0.0274
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.0805
+    classification: 0.0250
+
+
+ Average subgraph size = 1234.45
+
+ Average subgraph size = 1238.41
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.1917
+    classification: 0.0432
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 5.5985
+    classification: 0.0224
+
+
+ Average subgraph size = 1230.52
+
+ Average subgraph size = 1230.62
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.2909
+    classification: 0.0266
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 3.7394
+    classification: 0.0240
+
+
+ Average subgraph size = 1227.94
+
+ Average subgraph size = 1227.23
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.1740
+    classification: 0.0271
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.1177
+    classification: 0.0566
+
+
+ Average subgraph size = 1241.29
+
+ Average subgraph size = 1241.24
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.0787
+    classification: 0.0254
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.1781
+    classification: 0.0247
+
+
+ Average subgraph size = 1229.12
+
+ Average subgraph size = 1228.89
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.1656
+    classification: 0.0278
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.3969
+    classification: 0.0240
+
+
+ Average subgraph size = 1224.17
+
+ Average subgraph size = 1221.47
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.0969
+    classification: 0.0295
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.1133
+    classification: 0.0237
+
+
+ Average subgraph size = 1228.48
+
+ Average subgraph size = 1230.38
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.1707
+    classification: 0.0266
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.5128
+    classification: 0.0218
+
+
+ Average subgraph size = 1240.14
+
+ Average subgraph size = 1239.22
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.0957
+    classification: 0.0241
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.7500
+    classification: 0.0222
+
+
+ Average subgraph size = 1227.91
+
+ Average subgraph size = 1228.35
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.1234
+    classification: 0.0263
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 3.6443
+    classification: 0.0226
+
+
+ Average subgraph size = 1239.44
+
+ Average subgraph size = 1242.43
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.1030
+    classification: 0.0251
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.2659
+    classification: 0.0298
+
+
+ Average subgraph size = 1230.38
+
+ Average subgraph size = 1229.91
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.0725
+    classification: 0.0237
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.9593
+    classification: 0.0221
+
+
+ Average subgraph size = 1234.64
+
+ Average subgraph size = 1233.60
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.1980
+    classification: 0.0383
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.0200
+    classification: 0.0243
+
+
+ Average subgraph size = 1235.46
+
+ Average subgraph size = 1236.09
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.2400
+    classification: 0.0229
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 3.6774
+    classification: 0.0225
+
+
+ Average subgraph size = 1248.63
+
+ Average subgraph size = 1246.27
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.1400
+    classification: 0.0260
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.1531
+    classification: 0.0219
+
+
+ Average subgraph size = 1234.45
+
+ Average subgraph size = 1233.33
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.1417
+    classification: 0.0248
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 4.8766
+    classification: 0.0221
+
+
+ Average subgraph size = 1243.97
+
+ Average subgraph size = 1242.64
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.0783
+    classification: 0.0242
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.3173
+    classification: 0.0213
+
+
+ Average subgraph size = 1231.20
+
+ Average subgraph size = 1235.24
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.1536
+    classification: 0.0272
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.2262
+    classification: 0.0251
+
+
+ Average subgraph size = 1233.19
+
+ Average subgraph size = 1233.72
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.2472
+    classification: 0.0226
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.4733
+    classification: 0.0217
+
+
+ Average subgraph size = 1242.80
+
+ Average subgraph size = 1243.65
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.1232
+    classification: 0.0263
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.4412
+    classification: 0.0212
+
+
+ Average subgraph size = 1234.11
+
+ Average subgraph size = 1235.00
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.1072
+    classification: 0.0236
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.4743
+    classification: 0.0225
+
+
+ Average subgraph size = 1224.33
+
+ Average subgraph size = 1228.89
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.1593
+    classification: 0.0257
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 3.0433
+    classification: 0.0217
+
+
+ Average subgraph size = 1231.36
+
+ Average subgraph size = 1228.93
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.2492
+    classification: 0.0225
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 4.5087
+    classification: 0.0222
+
+
+ Average subgraph size = 1223.33
+
+ Average subgraph size = 1226.39
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.0931
+    classification: 0.0239
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.4622
+    classification: 0.0292
+
+
+ Average subgraph size = 1221.19
+
+ Average subgraph size = 1220.68
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.1384
+    classification: 0.0247
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.1607
+    classification: 0.0236
+
+
+ Average subgraph size = 1229.70
+
+ Average subgraph size = 1229.69
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.0841
+    classification: 0.0252
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.3293
+    classification: 0.0240
+
+
+ Average subgraph size = 1233.94
+
+ Average subgraph size = 1235.71
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.1781
+    classification: 0.0334
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 3.0912
+    classification: 0.0219
+
+
+ Average subgraph size = 1223.83
+
+ Average subgraph size = 1223.06
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.1603
+    classification: 0.0419
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.4318
+    classification: 0.0326
+
+
+ Average subgraph size = 1226.31
+
+ Average subgraph size = 1227.83
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.0946
+    classification: 0.0239
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 3.3104
+    classification: 0.0370
+
+
+ Average subgraph size = 1230.67
+
+ Average subgraph size = 1228.60
+
+ans =
+
+   608     0
+
+
+ans =
+
+   390   218
+
+fewer labels in one cluster
+
+ans =
+
+   368     0
+
+
+ans =
+
+   217   151
+
+fewer labels in one cluster
+
+ans =
+
+   608     0
+
+
+ans =
+
+   390   218
+
+fewer labels in one cluster
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.2926
+    classification: 0.0225
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 3.3638
+    classification: 0.0258
+
+
+ Average subgraph size = 1244.75
+
+ Average subgraph size = 1241.56
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.1241
+    classification: 0.0246
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.3229
+    classification: 0.0225
+
+
+ Average subgraph size = 1232.05
+
+ Average subgraph size = 1235.36
+
+time = 
+
+  struct with fields:
+
+            comdet: 0.1098
+    classification: 0.0260
+
+
+time = 
+
+  struct with fields:
+
+            comdet: 2.5146
+    classification: 0.0220
+
+Parallel pool using the 'Processes' profile is shutting down.
